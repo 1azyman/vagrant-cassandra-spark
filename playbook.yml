@@ -1,0 +1,21 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    server_ip: 192.168.34.10
+    server_domain_name: cassandra-spark
+    cassandra_version: 3.5
+    cassandra_cluster_name: "Test Cluster"
+    cassandra_max_heap: "4G"
+    spark_version: 1.6.1
+    spark_max_heap: "2G"
+    spark_max_cores: 2
+    spark_cassandra_connector_version: 1.6.0-M2
+    spark_cassandra_connector_java_version: 1.6.0-M1
+
+  roles:
+      - network
+      - java
+      - cassandra
+      - spark

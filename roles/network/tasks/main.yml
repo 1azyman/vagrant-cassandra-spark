@@ -1,0 +1,4 @@
+- name: update hosts file
+  lineinfile:
+    dest=/etc/hosts
+    line="{{ server_ip }} {{ server_domain_name }}"

@@ -1,0 +1,23 @@
+[Unit]
+Description=Cassandra
+After=network.target
+
+[Service]
+User=cassandra
+Group=cassandra
+RuntimeDirectory=cassandra
+PIDFile=/run/cassandra/cassandra.pid
+ExecStart=/opt/cassandra/bin/cassandra -f -p /run/cassandra/cassandra.pid
+StandardOutput=journal
+StandardError=journal
+OOMScoreAdjust=-500
+LimitNOFILE=infinity
+LimitMEMLOCK=infinity
+LimitNPROC=infinity
+LimitAS=infinity
+Environment=MAX_HEAP_SIZE={{ cassandra_max_heap }} HEAP_NEWSIZE=1G CASSANDRA_HEAPDUMP_DIR=/opt/cassandra/log
+CPUAccounting=true
+CPUShares=1000
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,78 @@
+- name: create spark group
+  group:
+    name=spark
+
+- name: create spark user
+  user:
+    name=spark
+    shell=/bin/bash
+    groups=spark
+    append=yes
+    generate_ssh_key=yes
+    ssh_key_comment=no
+  register: spark_user
+
+- name: add authorized key for spark
+  authorized_key:
+    user=spark
+    key="{{ spark_user.ssh_public_key }}"
+
+- name: download spark
+  get_url:
+    url=http://tux.rainside.sk/apache/spark/spark-{{ spark_version }}/spark-{{ spark_version }}-bin-hadoop2.6.tgz
+    dest=/opt/spark-{{ spark_version }}-bin-hadoop2.6.tgz
+    force=no
+
+- name: unzip spark
+  unarchive:
+    copy=no
+    src=/opt/spark-{{ spark_version }}-bin-hadoop2.6.tgz
+    dest=/opt/
+    group=spark
+    owner=spark
+    creates=/opt/spark-{{ spark_version }}-bin-hadoop2.6
+
+- name: spark symlink
+  file:
+    src=/opt/spark-{{ spark_version }}-bin-hadoop2.6
+    dest=/opt/spark
+    state=link
+    group=spark
+    owner=spark
+
+- name: alias spark commands
+  lineinfile:
+    dest=/home/vagrant/.bashrc
+    line="export PATH=$PATH:/opt/spark/bin:/opt/spark/sbin"
+
+- name: copy over spark-env.sh file
+  template:
+    src=spark-env.sh
+    dest=/opt/spark/conf/spark-env.sh
+    group=spark
+    owner=spark
+
+- name: copy spark-cassandra connector assembly file and other libraries
+  copy:
+    src=./roles/spark/custom-lib
+    dest=/opt/spark/
+    group=spark
+    owner=spark
+
+- name: spark folder ownership
+  file:
+    path=/opt/spark-{{ spark_version }}-bin-hadoop2.6
+    group=spark
+    owner=spark
+    recurse=yes
+
+- name: prepare spark systemd service file
+  template:
+    src=spark.service
+    dest=/etc/systemd/system/spark.service
+
+- name: start spark service
+  service:
+    name=spark
+    state=started
+    enabled=yes

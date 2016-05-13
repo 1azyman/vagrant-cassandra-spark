@@ -1,0 +1,74 @@
+- name: create cassandra group
+  group:
+    name=cassandra
+
+- name: create cassandra user
+  user:
+    name=cassandra
+    shell=/bin/bash
+    groups=cassandra append=yes
+
+- name: download cassandra
+  get_url:
+    url=http://tux.rainside.sk/apache/cassandra/{{ cassandra_version }}/apache-cassandra-{{ cassandra_version }}-bin.tar.gz
+    dest=/opt/apache-cassandra-{{ cassandra_version }}-bin.tar.gz
+    force=no
+
+- name: unzip cassandra
+  unarchive:
+    copy=no
+    src=/opt/apache-cassandra-{{ cassandra_version }}-bin.tar.gz
+    dest=/opt/
+    group=cassandra
+    owner=cassandra
+    creates=/opt/apache-cassandra-{{ cassandra_version }}
+
+- name: cassandra symlink
+  file:
+    src=/opt/apache-cassandra-{{ cassandra_version }}
+    dest=/opt/cassandra
+    state=link
+    group=cassandra
+    owner=cassandra
+
+- name: alias cassandra commands
+  lineinfile:
+    dest=/home/vagrant/.bashrc
+    line="export PATH=$PATH:/opt/cassandra/bin:/opt/cassandra/sbin"
+
+- name: copy over cassandra yaml file
+  template:
+    src=cassandra.yaml
+    dest=/opt/cassandra/conf/cassandra.yaml
+    group=cassandra
+    owner=cassandra
+
+- name: copy over cassandra topology properties file
+  template:
+    src=cassandra-topology.properties
+    dest=/opt/cassandra/conf/cassandra-topology.properties
+    group=cassandra
+    owner=cassandra
+
+- name: create data folder
+  file:
+    path=/opt/cassandra/data
+    state=directory
+
+- name: cassandra folder ownership
+  file:
+    path=/opt/apache-cassandra-{{ cassandra_version }}
+    group=cassandra
+    owner=cassandra
+    recurse=yes
+
+- name: prepare cassandra systemd service file
+  template:
+    src=cassandra.service
+    dest=/etc/systemd/system/cassandra.service
+
+- name: start cassandra service
+  service:
+    name=cassandra
+    state=started
+    enabled=yes

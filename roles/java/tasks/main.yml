@@ -1,0 +1,27 @@
+- name: add java repository
+  apt_repository:
+    repo='ppa:webupd8team/java'
+    state=present
+
+- name: check oracle java licence confirmation
+  shell:
+    /usr/bin/debconf-show oracle-java8-installer | grep shared/accepted-oracle-license-v1-1 | grep true | wc -l
+  register: licence_confirmation
+  changed_when: licence_confirmation.stdout != "1"
+
+- name: confirm oracle java licence
+  shell:
+    echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+  when:
+    licence_confirmation.stdout != "1"
+
+- name: install java
+  apt:
+    name=oracle-java8-installer
+    update_cache=yes
+    state=present
+
+- name: java as default
+  apt:
+    name=oracle-java8-set-default
+    state=present
