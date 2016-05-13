@@ -8,5 +8,5 @@ This is very simple vagrant & ansible script which will install:
 * cassandra 3
 * spark 1.6.1 with java support
 
-You'll need Vagrant and Ansimble installed on host machine. It's work in progress.
+You'll need [Vagrant](http://www.vagrantup.com/) and [Ansible](https://www.ansible.com/) installed on host machine. It's work in progress.
 
