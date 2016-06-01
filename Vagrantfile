@@ -17,30 +17,9 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |vb|
     vb.name = "cassandra-spark"
     vb.gui = false
-    vb.memory = "10240"
-    vb.cpus = 6
-
-    file_to_disk = "/data/virtual-box/" + vb.name + "/cassandra-data.vdi"
-
-    if ARGV[0] == "up" && ! File.exist?(file_to_disk)
-      vb.customize [
-                       'createhd',
-                       '--filename', file_to_disk,
-                       '--format', 'VDI',
-                       '--size', 100 * 1024 # 100 GB
-                   ]
-      vb.customize [
-                       'storageattach', :id,
-                       '--storagectl', 'SATAController', # The name may vary
-                       '--port', 1,
-                       '--device', 0,
-                       '--type', 'hdd',
-                       '--medium', file_to_disk
-                   ]
-    end
+    vb.memory = "8192"
+    vb.cpus = 4
   end
-
-  config.vm.provision "shell", path: "./mount-drive.sh"
 
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "playbook.yml"
