@@ -66,13 +66,24 @@
     owner=spark
     recurse=yes
 
-- name: prepare spark systemd service file
+- name: prepare spark master systemd service file
   template:
-    src=spark.service
-    dest=/etc/systemd/system/spark.service
+    src=spark-master.service
+    dest=/etc/systemd/system/spark-master.service
 
-- name: start spark service
+- name: prepare spark worker systemd service file
+  template:
+    src=spark-worker.service
+    dest=/etc/systemd/system/spark-worker.service
+
+- name: start spark master service
   service:
-    name=spark
+    name=spark-master
+    state=started
+    enabled=yes
+
+- name: start spark worker service
+  service:
+    name=spark-worker
     state=started
     enabled=yes
